@@ -1,9 +1,7 @@
-name: Automated PR Review
+name: Vehicle Rental PR Review
 
 on:
   pull_request:
-    branches:
-      - main
 
 jobs:
   review:
@@ -11,30 +9,30 @@ jobs:
 
     steps:
 
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Compile Project
         run: |
           find . -name "*.java" > sources.txt
           javac @sources.txt
 
-      - name: Check for TODO Comments
+      - name: Check Vehicle Abstract Class
         run: |
-          if grep -R "TODO" .; then
-            echo "TODO comments found"
-            exit 1
-          fi
+          grep -R "abstract class Vehicle" .
 
-      - name: Check for System.exit
+      - name: Check Inheritance
         run: |
-          if grep -R "System.exit" .; then
-            echo "System.exit detected"
-            exit 1
-          fi
+          grep -R "extends Vehicle" .
+
+      - name: Check Method Overriding
+        run: |
+          grep -R "@Override" .
+
+      - name: Fail On TODO Comments
+        run: |
+          ! grep -R "TODO" .
