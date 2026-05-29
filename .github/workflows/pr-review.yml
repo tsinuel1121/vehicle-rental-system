@@ -18,21 +18,48 @@ jobs:
 
       - name: Compile Project
         run: |
+          mkdir -p out
           find . -name "*.java" > sources.txt
-          javac @sources.txt
+          javac -d out @sources.txt
 
-      - name: Check Vehicle Abstract Class
+      - name: Check Abstract Vehicle Class
         run: |
-          grep -R "abstract class Vehicle" .
+          grep -R "abstract class Vehicle" . --include="*.java"
+          echo "PASS: Abstract Vehicle class found."
 
       - name: Check Inheritance
         run: |
-          grep -R "extends Vehicle" .
+          grep -R "extends Vehicle" . --include="*.java"
+          echo "PASS: Inheritance detected."
 
       - name: Check Method Overriding
         run: |
-          grep -R "@Override" .
+          grep -R "@Override" . --include="*.java"
+          echo "PASS: Method overriding detected."
+
+      - name: Check Encapsulation (private fields)
+        run: |
+          grep -R "private " . --include="*.java"
+          echo "PASS: Private fields detected."
+
+      - name: Check Setters Exist
+        run: |
+          grep -R "public void set" . --include="*.java"
+          echo "PASS: Setters detected."
+
+      - name: Check Method Overloading
+        run: |
+          count=$(grep -R "public double rent" . --include="*.java" | wc -l)
+          if [ "$count" -lt 2 ]; then
+            echo "FAIL: Method overloading not detected."
+            exit 1
+          fi
+          echo "PASS: Method overloading detected ($count rent() signatures)."
 
       - name: Fail On TODO Comments
         run: |
-          ! grep -R "TODO" .
+          if grep -R "TODO" . --include="*.java"; then
+            echo "FAIL: TODO comments found. Clean them up before merging."
+            exit 1
+          fi
+          echo "PASS: No TODO comments found."
