@@ -1,0 +1,40 @@
+name: Automated PR Review
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile Project
+        run: |
+          find . -name "*.java" > sources.txt
+          javac @sources.txt
+
+      - name: Check for TODO Comments
+        run: |
+          if grep -R "TODO" .; then
+            echo "TODO comments found"
+            exit 1
+          fi
+
+      - name: Check for System.exit
+        run: |
+          if grep -R "System.exit" .; then
+            echo "System.exit detected"
+            exit 1
+          fi
